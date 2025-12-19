@@ -1,0 +1,238 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Admin Dashboard{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/buttons.css' %}">
+<link rel="stylesheet" href="{% static 'css/admin_dashboard.css' %}">
+{% endblock %}
+
+{% block content %}
+
+<div class="admin-dashboard-page">
+
+  <!-- ================= CARD 1: Admin Functional ================= -->
+  <div class="card dashboard-card shadow-sm mb-4">
+    <div class="card-body">
+      <h5 class="mb-3">Admin Functional</h5>
+
+      <div class="d-flex flex-wrap gap-2">
+        <a href="{% url 'admin_create_user' %}" class="btn-system btn-green">
+          Create User
+        </a>
+
+        <!-- Edit User ยังไม่ทำ → กลับมาหน้านี้ก่อน -->
+        <a href="{% url 'admin_dashboard' %}" class="btn-system btn-blue">
+          Edit User
+        </a>
+      </div>
+    </div>
+  </div>
+
+
+<!-- ================= CARD 2: User Notifications ================= -->
+<div class="card dashboard-card shadow-sm mb-4">
+  <div class="card-body">
+
+    <!-- ===== Header + Pagination ===== -->
+    <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-3">
+      <h5 class="mb-0">User Notifications</h5>
+
+      <div class="d-flex align-items-center gap-2">
+
+        <!-- ◀ Previous -->
+        {% if notif_page.has_previous %}
+          <a class="btn btn-sm btn-outline-secondary"
+             href="?notif_page={{ notif_page.previous_page_number }}&user_page={{ user_page.number }}">
+            ◀
+          </a>
+        {% else %}
+          <span class="btn btn-sm btn-outline-secondary disabled">◀</span>
+        {% endif %}
+
+        <!-- Page Info -->
+        <span class="small text-muted">
+          {% if notif_page_total == 0 %}
+            0/0
+          {% else %}
+            {{ notif_page_num }}/{{ notif_page_total }}
+          {% endif %}
+        </span>
+
+        <!-- ▶ Next -->
+        {% if notif_page.has_next %}
+          <a class="btn btn-sm btn-outline-secondary"
+             href="?notif_page={{ notif_page.next_page_number }}&user_page={{ user_page.number }}">
+            ▶
+          </a>
+        {% else %}
+          <span class="btn btn-sm btn-outline-secondary disabled">▶</span>
+        {% endif %}
+
+      </div>
+    </div>
+
+    <!-- ===== Table ===== -->
+    <div class="table-responsive">
+      <table class="table table-sm align-middle mb-0">
+        <thead class="table-light">
+          <tr>
+            <!-- ใช้ชื่อ column ตาม DB -->
+            <th>id</th>
+            <th>user_id</th>
+            <th>title</th>
+            <th>event_type</th>
+            <th>event_datetime</th>
+            <th>start_datetime</th>
+            <th>interval_value</th>
+            <th>interval_unit</th>
+            <th>offset_value</th>
+            <th>offset_unit</th>
+            <th>created_at</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          {% for n in notif_page.object_list %}
+            {% with r=n.reminders.all|first %}
+              <tr>
+                <td>{{ n.id }}</td>
+                <td>{{ n.user_id }}</td>
+                <td class="text-truncate" style="max-width:220px;">
+                  {{ n.title }}
+                </td>
+                <td>{{ n.event_type }}</td>
+                <td>{{ n.event_datetime|default:"" }}</td>
+                <td>{{ n.start_datetime|default:"" }}</td>
+                <td>{{ n.interval_value|default:"" }}</td>
+                <td>{{ n.interval_unit|default:"" }}</td>
+                <td>{% if r %}{{ r.offset_value }}{% endif %}</td>
+                <td>{% if r %}{{ r.offset_unit }}{% endif %}</td>
+                <td>{{ n.created_at }}</td>
+              </tr>
+            {% endwith %}
+          {% empty %}
+            <tr>
+              <td colspan="11" class="text-center text-muted py-4">
+                ไม่มีข้อมูล notifications
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+  </div>
+</div>
+
+
+
+<!-- ================= CARD 3: Users Information ================= -->
+<div class="card dashboard-card shadow-sm">
+  <div class="card-body">
+
+    <!-- ===== Header + Pagination ===== -->
+    <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-3">
+      <h5 class="mb-0">Users Information</h5>
+
+      <div class="d-flex align-items-center gap-2">
+
+        <!-- ◀ Previous -->
+        {% if user_page.has_previous %}
+          <a class="btn btn-sm btn-outline-secondary"
+             href="?user_page={{ user_page.previous_page_number }}&notif_page={{ notif_page.number }}">
+            ◀
+          </a>
+        {% else %}
+          <span class="btn btn-sm btn-outline-secondary disabled">◀</span>
+        {% endif %}
+
+        <!-- Page Info -->
+        <span class="small text-muted">
+          {% if user_page_total == 0 %}
+            0/0
+          {% else %}
+            {{ user_page_num }}/{{ user_page_total }}
+          {% endif %}
+        </span>
+
+        <!-- ▶ Next -->
+        {% if user_page.has_next %}
+          <a class="btn btn-sm btn-outline-secondary"
+             href="?user_page={{ user_page.next_page_number }}&notif_page={{ notif_page.number }}">
+            ▶
+          </a>
+        {% else %}
+          <span class="btn btn-sm btn-outline-secondary disabled">▶</span>
+        {% endif %}
+
+      </div>
+    </div>
+
+    <!-- ===== Table ===== -->
+    <div class="table-responsive">
+      <table class="table table-sm align-middle mb-0">
+        <thead class="table-light">
+          <tr>
+            <th>id</th>
+            <th>username</th>
+            <th>is_staff</th>
+            <th>telegram_chat_id</th>
+            <th>date_joined</th>
+            <th>last_login</th>
+            <th>action</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          {% for u in user_page.object_list %}
+            <tr>
+              <td>{{ u.id }}</td>
+              <td>{{ u.username }}</td>
+              <td>{{ u.is_staff }}</td>
+              <td>{{ u.telegram_chat_id|default:"" }}</td>
+              <td>{{ u.date_joined }}</td>
+              <td>{{ u.last_login|default:"" }}</td>
+
+              <td class="d-flex gap-2">
+
+                <!-- Edit (Future Feature) -->
+                <a href="{% url 'admin_dashboard' %}"
+                   class="btn btn-sm btn-outline-primary"
+                   title="แก้ไขบัญชีผู้ใช้">
+                  ✏
+                </a>
+
+                <!-- Delete -->
+                <form method="post"
+                      action="{% url 'admin_delete_user' u.id %}"
+                      onsubmit="return confirm('คุณต้องการจะลบบัญชีผู้ใช้หรือไม่?');">
+                  {% csrf_token %}
+                  <button type="submit"
+                          class="btn btn-sm btn-outline-danger"
+                          title="ลบบัญชีผู้ใช้">
+                    🗑
+                  </button>
+                </form>
+
+              </td>
+            </tr>
+          {% empty %}
+            <tr>
+              <td colspan="7" class="text-center text-muted py-4">
+                ไม่มีข้อมูลผู้ใช้งาน
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+  </div>
+</div>
+
+
+</div>
+
+{% endblock %}

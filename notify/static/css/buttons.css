@@ -1,0 +1,85 @@
+/* =========================
+   Button System (Global)
+========================= */
+
+/* Base Button */
+.btn-system {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 44px;
+  padding: 0 26px;
+  border-radius: 8px;
+  font-size: 15px;
+  font-weight: 600;
+  color: #fff;
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+  text-decoration: none;
+}
+
+/* =========================
+   GREEN (Success / Create)
+========================= */
+.btn-green {
+  background-color: #00d423;
+  border-color: #31c400;
+}
+
+.btn-green:hover {
+  background-color: #146c43;
+  border-color: #146c43;
+  color: #fff;
+}
+
+/* =========================
+   RED (Danger / Cancel)
+========================= */
+.btn-red {
+  background-color: #dc3545;
+  border-color: #dc3545;
+}
+
+.btn-red:hover {
+  background-color: #b02a37;
+  border-color: #b02a37;
+  color: #fff;
+}
+
+/* =========================
+   BLUE (Info / Token)
+========================= */
+.btn-blue {
+  background-color: #0d6efd;
+  border-color: #0d6efd;
+}
+
+.btn-blue:hover {
+  background-color: #0b5ed7;
+  border-color: #0b5ed7;
+  color: #fff;
+}
+
+/* =========================
+   ORANGE (Primary)
+========================= */
+.btn-orange {
+  background-color: #ff7800;
+  border-color: #ff7800;
+}
+
+.btn-orange:hover {
+  background-color: #e06700;
+  border-color: #e06700;
+  color: #fff;
+}
+
+/* =========================
+   Disabled
+========================= */
+.btn-system:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+

@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Login{% endblock %}
+
+{% block content %}
+
+<link rel="stylesheet" href="{% static 'css/login.css' %}">
+
+<div class="login-wrapper">
+
+    <div class="login-content">
+
+        <!-- Logo -->
+        <div class="login-logo">
+            <img src="{% static 'images/amari_logo.png' %}" alt="Amari Logo">
+        </div>
+
+        <!-- Login Card -->
+        <div class="login-container">
+            <form method="post">
+                {% csrf_token %}
+
+                <div class="mb-3">
+                    <input
+                        type="text"
+                        name="username"
+                        class="form-control"
+                        placeholder="username"
+                        required
+                    >
+                </div>
+
+                <div class="mb-3">
+                    <input
+                        type="password"
+                        name="password"
+                        class="form-control"
+                        placeholder="password"
+                        required
+                    >
+                </div>
+
+                <button type="submit" class="btn btn-enter w-100">
+                    Log In
+                </button>
+            </form>
+        </div>
+
+        <!-- Footer -->
+        <div class="footer-info">
+            Amari Pattaya Notification Local Internal Web Application
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

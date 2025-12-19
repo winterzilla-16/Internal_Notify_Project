@@ -1,0 +1,65 @@
+/* =========================
+   Cards
+========================= */
+
+.admin-create-user-grid .admin-card {
+  border-radius: 14px;
+  border: 0;
+  height: 520px;        /* ✅ lock เฉพาะ desktop */
+}
+
+/* =========================
+   Form
+========================= */
+
+.admin-card .form-control {
+  height: 45px;
+}
+
+/* =========================
+   QR Box
+========================= */
+
+.qr-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  height: 100%;
+      padding: 20px 0;
+}
+
+.qr-image {
+  max-width: 220px;
+  width: 100%;
+  height: auto;
+}
+
+
+/* =========================
+   RESPONSIVE
+========================= */
+
+/* 🔹 Tablet */
+@media (max-width: 992px) {
+  .admin-create-user-grid {
+    grid-template-columns: 1fr;
+    max-width: 520px;
+  }
+
+  .admin-create-user-grid .admin-card {
+    height: auto;      /* 🔓 ปลด lock ความสูง */
+  }
+}
+
+/* 🔹 Mobile */
+@media (max-width: 576px) {
+  .admin-create-user-wrapper {
+    align-items: flex-start;
+  }
+
+  .admin-create-user-grid {
+    gap: 20px;
+  }
+}

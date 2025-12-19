@@ -1,0 +1,21 @@
+.admin-dashboard-page {
+  padding: 10px 0 30px;
+}
+
+.dashboard-card {
+  border-radius: 14px;
+  border: 0;
+}
+
+/* ให้ตารางอ่านง่ายขึ้นบนจอเล็ก */
+.table td, .table th {
+  vertical-align: middle;
+  white-space: nowrap;
+}
+
+/* ปรับให้ไม่แน่นเกินไป */
+@media (max-width: 768px) {
+  .admin-dashboard-page {
+    padding-top: 6px;
+  }
+}

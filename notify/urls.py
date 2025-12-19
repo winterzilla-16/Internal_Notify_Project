@@ -1,0 +1,11 @@
+from django.urls import path
+from . import views
+
+urlpatterns = [
+    path('', views.login_view, name='login'),                 # กำหนดเป็นหน้า index (/)
+    path('logout/', views.logout_view, name='logout'),
+    path('dashboard/', views.user_dashboard, name='dashboard'),
+    path('admin-dashboard/', views.admin_dashboard, name='admin_dashboard'),
+    path('admin-create_user/', views.admin_create_user, name='admin_create_user'),
+    path('admin/users/<int:user_id>/delete/', views.admin_delete_user, name='admin_delete_user'),
+]

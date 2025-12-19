@@ -1,0 +1,109 @@
+/* =========================
+   Page Background
+========================= */
+
+body {
+    background-color: #fde7d9;
+    overflow: hidden; /* ป้องกัน scroll ที่ไม่จำเป็น */
+}
+
+/* =========================
+   Layout Wrapper
+========================= */
+
+.login-wrapper {
+    min-height: calc(100vh - 70px); /* หัก navbar */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* =========================
+   Content (ขยับขึ้นแบบไม่เพี้ยน)
+========================= */
+
+.login-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    transform: translateY(-18vh); /* ขยับขึ้นแบบ responsive */
+}
+
+/* กันจอเตี้ย */
+@media (max-height: 700px) {
+    .login-content {
+        transform: translateY(-5vh);
+    }
+}
+
+@media (max-height: 600px) {
+    .login-content {
+        transform: translateY(-2vh);
+    }
+}
+
+/* =========================
+   Logo
+========================= */
+
+.login-logo {
+    text-align: center;
+    margin-bottom: 14px;
+}
+
+.login-logo img {
+    width: 160px;
+    max-width: 60vw;
+}
+
+/* =========================
+   Login Card
+========================= */
+
+.login-container {
+    width: 100%;
+    max-width: 380px;
+    padding: 30px;
+    background: #ffffff;
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+/* =========================
+   Input
+========================= */
+
+.login-container .form-control {
+    height: 45px;
+    font-size: 15px;
+    border-radius: 4px;
+}
+
+/* =========================
+   Button
+========================= */
+
+.btn-enter {
+    background-color: #ff7800;
+    border-color: #ff7800;
+    color: #ffffff;
+    font-weight: bold;
+    height: 45px;
+}
+
+.btn-enter:hover {
+    background-color: #e06700;
+    border-color: #e06700;
+    color: #ffffff;
+}
+
+/* =========================
+   Footer
+========================= */
+
+.footer-info {
+    margin-top: 22px;
+    text-align: center;
+    color: #777;
+    font-size: 14px;
+}
