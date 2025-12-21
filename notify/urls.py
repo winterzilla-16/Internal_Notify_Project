@@ -8,4 +8,5 @@ urlpatterns = [
     path('admin-dashboard/', views.admin_dashboard, name='admin_dashboard'),
     path('admin-create_user/', views.admin_create_user, name='admin_create_user'),
     path('admin/users/<int:user_id>/delete/', views.admin_delete_user, name='admin_delete_user'),
+    path('notifications/create/', views.create_notification, name='create_notification'),
 ]

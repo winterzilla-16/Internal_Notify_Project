@@ -8,4 +8,24 @@
     <p class="text-muted">ยินดีต้อนรับเข้าสู่ระบบแจ้งเตือน</p>
   </div>
 </div>
+
+<!-- ================= CREATE NOTIFICATION ================= -->
+<div class="card dashboard-card shadow-sm mb-4">
+  <div class="card-body d-flex align-items-center justify-content-between flex-wrap gap-3">
+
+    <div>
+      <h5 class="mb-1">Notifications</h5>
+      <p class="text-muted mb-0 small">
+        สร้างและจัดการการแจ้งเตือนของคุณ
+      </p>
+    </div>
+
+    <a href="{% url 'create_notification' %}"
+       class="btn-system btn-orange">
+      + Create Notification
+    </a>
+
+  </div>
+</div>
+
 {% endblock %}

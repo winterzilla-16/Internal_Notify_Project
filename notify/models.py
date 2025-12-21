@@ -47,6 +47,12 @@ class Notification(models.Model):
         ('year', 'year'),
     ]
 
+    STATUS_CHOICES = [
+    ('pending', 'Pending'),
+    ('success', 'Success'),
+    ('failure', 'Failure'),
+    ]
+
     user = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
@@ -55,8 +61,6 @@ class Notification(models.Model):
 
     title = models.TextField()
     description = models.TextField(null=True, blank=True)
-
-    # เก็บ path / filename ตาม database design
     file = models.TextField(null=True, blank=True)
 
     event_type = models.CharField(
@@ -74,6 +78,20 @@ class Notification(models.Model):
         blank=True,
         choices=INTERVAL_UNIT_CHOICES
     )
+
+    status = models.CharField(
+        max_length=10,
+        choices=STATUS_CHOICES,
+        default='pending',
+        help_text='Notification sending status'
+    )
+
+    retry_count = models.PositiveSmallIntegerField(
+        default=0,
+        help_text="จำนวนครั้งที่ retry การส่ง notification ในรอบปัจจุบัน"
+    )
+
+    last_sent_event_at = models.DateTimeField(null=True, blank=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
 
@@ -108,6 +126,9 @@ class Reminder(models.Model):
         max_length=10,
         choices=OFFSET_UNIT_CHOICES
     )
+
+    last_sent_event_at = models.DateTimeField(null=True, blank=True)
+    
 
     class Meta:
         db_table = 'reminders'

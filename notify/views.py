@@ -6,6 +6,7 @@ from django.contrib.auth import logout
 from django.contrib import messages
 from django.views.decorators.cache import never_cache
 from django.core.paginator import Paginator
+from django.conf import settings
 from .models import Notification, User, Reminder
 
 
@@ -161,3 +162,76 @@ def admin_delete_user(request, user_id):
     target.delete()
     messages.success(request, "ลบบัญชีเรียบร้อยแล้ว")
     return redirect('admin_dashboard')
+
+# Create Notification (USER)
+@never_cache
+@login_required(login_url="login")
+def create_notification(request):
+
+    if request.method == "POST":
+
+        # =====================
+        # 1. อ่านค่าจากฟอร์ม
+        # =====================
+        title = request.POST.get("title")
+        description = request.POST.get("description")
+        event_type = request.POST.get("event_type")
+
+        event_datetime = request.POST.get("event_datetime") or None
+        start_datetime = request.POST.get("start_datetime") or None
+        interval_value = request.POST.get("interval_value") or None
+        interval_unit = request.POST.get("interval_unit") or None
+
+        uploaded_file = request.FILES.get("file")
+
+        # =====================
+        # 2. สร้าง Notification
+        # =====================
+        notification = Notification.objects.create(
+            user=request.user,
+            title=title,
+            description=description,
+            event_type=event_type,
+            event_datetime=event_datetime,
+            start_datetime=start_datetime,
+            interval_value=interval_value,
+            interval_unit=interval_unit,
+            status="pending",  # สำคัญมาก
+        )
+
+        # =====================
+        # 3. จัดการไฟล์แนบ
+        # =====================
+        if uploaded_file:
+            file_path = f"{notification.id}_{uploaded_file.name}"
+            full_path = settings.MEDIA_ROOT / file_path
+
+            with open(full_path, "wb+") as destination:
+                for chunk in uploaded_file.chunks():
+                    destination.write(chunk)
+
+            # เก็บ path ลง DB
+            notification.file = file_path
+            notification.save()
+
+        # =====================
+        # 4. สร้าง Reminders (หลายรายการ)
+        # =====================
+        offset_values = request.POST.getlist("offset_value[]")
+        offset_units = request.POST.getlist("offset_unit[]")
+
+        for val, unit in zip(offset_values, offset_units):
+            Reminder.objects.create(
+                notification=notification,
+                offset_value=int(val),
+                offset_unit=unit
+            )
+
+        # =====================
+        # 5. Feedback + Redirect
+        # =====================
+        messages.success(request, "สร้างการแจ้งเตือนเรียบร้อยแล้ว")
+        return redirect("dashboard")
+
+    # GET
+    return render(request, "notifications/create_notification.html")

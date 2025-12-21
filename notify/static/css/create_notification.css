@@ -1,0 +1,43 @@
+/* =========================
+   Create Notification Page
+========================= */
+
+.create-notify-page {
+  max-width: 1100px;
+}
+
+.create-notify-card {
+  border-radius: 14px;
+  border: 0;
+}
+
+.section-title {
+  font-weight: 800;
+  font-size: 16px;
+  margin-bottom: 14px;
+}
+
+.hint-text {
+  font-size: 13px;
+  color: #6c757d;
+}
+
+.reminders-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.reminder-row {
+  padding: 14px;
+  border: 1px solid rgba(0,0,0,.08);
+  border-radius: 12px;
+  background: #fff;
+}
+
+@media (max-width: 576px) {
+  .create-notify-page {
+    padding-left: 8px;
+    padding-right: 8px;
+  }
+}
