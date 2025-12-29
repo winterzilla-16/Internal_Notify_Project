@@ -7,7 +7,13 @@ from django.contrib import messages
 from django.views.decorators.cache import never_cache
 from django.core.paginator import Paginator
 from django.conf import settings
-from .models import Notification, User, Reminder
+from django.core.files.storage import FileSystemStorage
+from notify.services.savefile import get_available_filename
+from datetime import datetime
+from django.utils import timezone
+from notify.models import Notification, User, Reminder
+
+
 
 
 # ----- Web App: Login Logic ----- 
@@ -177,15 +183,32 @@ def create_notification(request):
         description = request.POST.get("description")
         event_type = request.POST.get("event_type")
 
-        event_datetime = request.POST.get("event_datetime") or None
-        start_datetime = request.POST.get("start_datetime") or None
+        event_datetime_raw = request.POST.get("event_datetime")
+        start_datetime_raw = request.POST.get("start_datetime")
+
         interval_value = request.POST.get("interval_value") or None
         interval_unit = request.POST.get("interval_unit") or None
 
         uploaded_file = request.FILES.get("file")
 
         # =====================
-        # 2. สร้าง Notification
+        # 2. แปลง datetime ให้เป็น aware
+        # =====================
+        event_datetime = None
+        start_datetime = None
+
+        if event_datetime_raw:
+            event_datetime = timezone.make_aware(
+                datetime.strptime(event_datetime_raw, "%Y-%m-%dT%H:%M")
+            )
+
+        if start_datetime_raw:
+            start_datetime = timezone.make_aware(
+                datetime.strptime(start_datetime_raw, "%Y-%m-%dT%H:%M")
+            )
+
+        # =====================
+        # 3. สร้าง Notification
         # =====================
         notification = Notification.objects.create(
             user=request.user,
@@ -196,39 +219,43 @@ def create_notification(request):
             start_datetime=start_datetime,
             interval_value=interval_value,
             interval_unit=interval_unit,
-            status="pending",  # สำคัญมาก
+            status="pending",
+            retry_count=0,
         )
 
         # =====================
-        # 3. จัดการไฟล์แนบ
+        # 4. จัดการไฟล์แนบ
         # =====================
         if uploaded_file:
-            file_path = f"{notification.id}_{uploaded_file.name}"
-            full_path = settings.MEDIA_ROOT / file_path
+            upload_dir = settings.MEDIA_ROOT
+            upload_dir.mkdir(exist_ok=True)
+            # parents=True,
 
-            with open(full_path, "wb+") as destination:
-                for chunk in uploaded_file.chunks():
-                    destination.write(chunk)
+            original_name = uploaded_file.name
+            safe_name = get_available_filename(upload_dir, original_name)
 
-            # เก็บ path ลง DB
-            notification.file = file_path
-            notification.save()
+            fs = FileSystemStorage(location=upload_dir)
+            filename = fs.save(safe_name, uploaded_file)
+
+            notification.file = filename
+            notification.save(update_fields=["file"])
 
         # =====================
-        # 4. สร้าง Reminders (หลายรายการ)
+        # 5. สร้าง Reminders (หลายรายการ)
         # =====================
         offset_values = request.POST.getlist("offset_value[]")
         offset_units = request.POST.getlist("offset_unit[]")
 
         for val, unit in zip(offset_values, offset_units):
-            Reminder.objects.create(
-                notification=notification,
-                offset_value=int(val),
-                offset_unit=unit
-            )
+            if val and unit:
+                Reminder.objects.create(
+                    notification=notification,
+                    offset_value=int(val),
+                    offset_unit=unit
+                )
 
         # =====================
-        # 5. Feedback + Redirect
+        # 6. Feedback + Redirect
         # =====================
         messages.success(request, "สร้างการแจ้งเตือนเรียบร้อยแล้ว")
         return redirect("dashboard")

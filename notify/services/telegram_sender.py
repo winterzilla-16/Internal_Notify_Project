@@ -32,7 +32,7 @@ def send_telegram_message(notification) -> bool:
         print("[TG] ❌ Missing chat_id")
         return False
 
-    message_text = notification.description or ""
+    message_text = notification.description or DEFAULT_MESSAGE
 
     try:
         resp = requests.post(
@@ -50,9 +50,14 @@ def send_telegram_message(notification) -> bool:
         if resp.status_code != 200:
             return False
 
-        # ส่งไฟล์ (ถ้ามี)
+        # =====================
+        # 2. Send File (optional)
+        # =====================
         if notification.file:
-            file_ok = send_file(notification, user.telegram_chat_id)
+            file_ok = send_file_by_notification(
+                notification=notification,
+                chat_id=user.telegram_chat_id,
+            )
             if not file_ok:
                 print("[TG] ❌ File send failed")
                 return False
@@ -63,8 +68,6 @@ def send_telegram_message(notification) -> bool:
     except Exception as e:
         print("[TG] ❌ Exception:", str(e))
         return False
-
-
 
 # =========================
 # Send Helpers
@@ -81,6 +84,22 @@ def send_text(chat_id: str, text: str) -> bool:
     )
     return response.status_code == 200
 
+def send_file_by_notification(notification, chat_id: str) -> bool:
+    """
+    wrapper สำหรับ notification.file
+    """
+    if not notification.file:
+        return True
+
+    # file ใน DB = relative path
+    full_path = os.path.join(settings.MEDIA_ROOT, notification.file)
+
+    if not os.path.exists(full_path):
+        print(f"[TG] ❌ File not found: {full_path}")
+        return False
+
+    caption = notification.description or ""
+    return send_file(chat_id, full_path, caption)
 
 def send_file(chat_id: str, file_path: str, caption: str = "") -> bool:
     """
@@ -99,20 +118,26 @@ def send_file(chat_id: str, file_path: str, caption: str = "") -> bool:
         endpoint = "sendDocument"
         file_key = "document"
 
-    with open(file_path, "rb") as f:
-        files = {
-            file_key: (filename, f)
-        }
-        data = {
-            "chat_id": chat_id,
-            "caption": caption,
-        }
+    try:
+        with open(file_path, "rb") as f:
+            files = {
+                file_key: (filename, f)
+            }
+            data = {
+                "chat_id": chat_id,
+                "caption": caption,
+            }
 
-        response = requests.post(
-            f"{BASE_URL}/{endpoint}",
-            data=data,
-            files=files,
-            timeout=20,
-        )
+            response = requests.post(
+                f"{BASE_URL}/{endpoint}",
+                data=data,
+                files=files,
+                timeout=20,
+            )
 
-    return response.status_code == 200
+        print("[TG] file status:", response.status_code)
+        return response.status_code == 200
+
+    except Exception as e:
+        print("[TG] ❌ File exception:", str(e))
+        return False
