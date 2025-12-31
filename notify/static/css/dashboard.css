@@ -1,0 +1,137 @@
+/* ================= DASHBOARD TABLE ================= */
+
+.dashboard-table {
+  table-layout: fixed;
+}
+
+.dashboard-table th {
+  white-space: nowrap;
+  font-size: 0.85rem;
+  text-align: center;
+  vertical-align: middle;
+}
+
+.dashboard-table td {
+  font-size: 0.85rem;
+  vertical-align: middle;
+  text-align: center;
+}
+
+/* ใช้กับ column ที่ยาว เช่น description */
+.max-w-200 {
+  max-width: 200px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ================= STATUS BADGE ================= */
+
+.status-badge {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: #fff;
+  text-transform: capitalize;
+}
+
+.status-pending {
+  background-color: #f0ad4e;
+}
+
+.status-success {
+  background-color: #5cb85c;
+}
+
+.status-failure {
+  background-color: #d9534f;
+}
+
+/* ================= FILE LINK ================= */
+
+.file-link {
+  text-decoration: none;
+  font-size: 1rem;
+}
+
+.file-link:hover {
+  opacity: 0.7;
+}
+
+/* ================= ACTION ICONS ================= */
+
+.action-icons {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+}
+
+.action-icons span {
+  cursor: pointer;
+  font-size: 1.05rem;
+  text-decoration: none;
+}
+
+.action-icons span:hover {
+  opacity: 0.7;
+}
+
+
+/* ================= PAGINATION ================= */
+/* (เผื่อใช้ในอนาคต ถ้าเลิกใช้ bootstrap button) */
+
+.pagination-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 12px;
+  margin-top: 15px;
+}
+
+.page-btn {
+  padding: 4px 10px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  text-decoration: none;
+  color: #333;
+  font-size: 0.85rem;
+}
+
+.page-btn:hover {
+  background-color: #f5f5f5;
+}
+
+.page-btn.disabled {
+  pointer-events: none;
+  opacity: 0.4;
+}
+
+.page-indicator {
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+/* ================= ACTION ICON ================= */
+
+.action-icons {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+}
+
+/* ตัดกรอบดำ แต่ยังใช้ bootstrap hover */
+.icon-btn {
+  padding: 6px 8px;
+  line-height: 1;
+  font-size: 1.1rem;
+}
+
+/* 🔥 ลบกรอบ focus ของ bootstrap */
+.icon-btn:focus,
+.icon-btn:focus-visible,
+.icon-btn:active {
+  outline: none !important;
+  box-shadow: none !important;
+}

@@ -60,9 +60,35 @@ def logout_view(request):
 @never_cache
 @login_required(login_url='login')
 def user_dashboard(request):
+
+    # ----- Admin redirect -----
     if request.user.is_staff:
         return redirect('admin_dashboard')
-    return render(request, 'dashboard.html')
+
+    # ----- Query notifications ของ user -----
+    notifications_qs = (
+        Notification.objects
+        .filter(user=request.user)
+        .prefetch_related("reminders")
+        .order_by("-created_at")   # ใหม่สุดอยู่บน
+    )
+
+    # ----- Pagination (5 rows / page) -----
+    paginator = Paginator(notifications_qs, 5)
+    page_number = request.GET.get("page", 1)
+    page_obj = paginator.get_page(page_number)
+
+    total_pages = paginator.num_pages if paginator.count > 0 else 0
+
+    # ----- Context -----
+    context = {
+        "notifications": page_obj,     
+        "page_obj": page_obj,
+        "total_pages": total_pages,
+        "MEDIA_URL": settings.MEDIA_URL,
+    }
+
+    return render(request, "dashboard.html", context)
 
 # Dashboard (ADMIN)
 @never_cache
@@ -168,6 +194,29 @@ def admin_delete_user(request, user_id):
     target.delete()
     messages.success(request, "ลบบัญชีเรียบร้อยแล้ว")
     return redirect('admin_dashboard')
+
+# Delete Notification (USER)
+@never_cache
+@login_required(login_url='login')
+def delete_notification(request, notification_id):
+
+    # ป้องกันการลบผ่าน GET
+    if request.method != "POST":
+        return redirect('dashboard')
+
+    notification = get_object_or_404(
+        Notification,
+        id=notification_id,
+        user=request.user  # 🔐 ต้องเป็นของ user คนนั้นเท่านั้น
+    )
+
+    try:
+        notification.delete()
+        messages.success(request, "ลบการแจ้งเตือนสำเร็จ ✅")
+    except Exception:
+        messages.error(request, "ลบการแจ้งเตือนไม่สำเร็จ ❌")
+
+    return redirect('dashboard')
 
 # Create Notification (USER)
 @never_cache

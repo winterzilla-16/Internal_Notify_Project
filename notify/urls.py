@@ -9,4 +9,5 @@ urlpatterns = [
     path('admin-create_user/', views.admin_create_user, name='admin_create_user'),
     path('admin/users/<int:user_id>/delete/', views.admin_delete_user, name='admin_delete_user'),
     path('notifications/create/', views.create_notification, name='create_notification'),
+    path('notifications/delete/<int:notification_id>/', views.delete_notification, name='delete_notification'),
 ]
