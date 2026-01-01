@@ -1,21 +1,22 @@
 /* ================= DASHBOARD TABLE ================= */
 
 .dashboard-table {
-  table-layout: fixed;
+  width: 100%;
+  table-layout: fixed;       /* 🔒 บังคับตารางไม่ขยาย */
+  border-collapse: collapse;
 }
 
-.dashboard-table th {
-  white-space: nowrap;
-  font-size: 0.85rem;
-  text-align: center;
-  vertical-align: middle;
-}
-
+.dashboard-table th,
 .dashboard-table td {
   font-size: 0.85rem;
   vertical-align: middle;
   text-align: center;
+
+  white-space: nowrap;       /* 🔒 ห้ามขึ้นบรรทัดใหม่ */
+  overflow: hidden;          /* 🔒 ตัดส่วนเกิน */
+  text-overflow: ellipsis;   /* … */
 }
+
 
 /* ใช้กับ column ที่ยาว เช่น description */
 .max-w-200 {
@@ -24,6 +25,7 @@
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+
 
 /* ================= STATUS BADGE ================= */
 
@@ -59,6 +61,8 @@
 .file-link:hover {
   opacity: 0.7;
 }
+
+
 
 /* ================= ACTION ICONS ================= */
 
@@ -119,6 +123,7 @@
   display: flex;
   gap: 8px;
   justify-content: center;
+  flex-wrap: nowrap;
 }
 
 /* ตัดกรอบดำ แต่ยังใช้ bootstrap hover */
@@ -128,7 +133,6 @@
   font-size: 1.1rem;
 }
 
-/* 🔥 ลบกรอบ focus ของ bootstrap */
 .icon-btn:focus,
 .icon-btn:focus-visible,
 .icon-btn:active {

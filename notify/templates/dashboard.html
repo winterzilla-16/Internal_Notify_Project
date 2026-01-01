@@ -22,7 +22,7 @@
     </div>
     <a href="{% url 'create_notification' %}"
        class="btn-system btn-orange">
-      + Create Notification
+        Create Notification ➕
     </a>
   </div>
 </div>
@@ -125,15 +125,27 @@
             <td>
             
               <div class="action-icons">
-              <span title="Send Now">📩</span>
-              <span title="Edit">✏️</span>
+              <form method="post"
+                  action="{% url 'send_now_notification' n.id %}"
+                  class="m-0">
+              {% csrf_token %}
+              <button type="submit"
+                      class="btn btn-sm btn-light icon-btn"
+                      title="Send Now">
+                📩
+              </button>
+            </form>
+
+              <a href="{% url 'edit_notification' n.id %}" class="btn btn-sm btn-light icon-btn" title="Edit">
+                ✏️
+              </a>
+
 
               <form method="post"
                   action="{% url 'delete_notification' n.id %}"
                   onsubmit="return confirm('คุณต้องการลบการแจ้งเตือนนี้หรือไม่ ?');"
                   class="m-0">
               {% csrf_token %}
-
               <button type="submit"
                       class="btn btn-sm btn-light icon-btn"
                       title="Delete">

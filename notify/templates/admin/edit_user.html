@@ -1,0 +1,117 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Create User{% endblock %}
+
+{% block content %}
+
+<!-- Global Button System -->
+<link rel="stylesheet" href="{% static 'css/buttons.css' %}">
+
+<!-- Page specific style -->
+<link rel="stylesheet" href="{% static 'css/admin_create_user.css' %}">
+
+<div class="container admin-create-user-page">
+  <div class="row justify-content-center align-items-stretch">
+
+    <!-- ================= FORM CARD ================= -->
+    <div class="col-lg-6 col-md-7 mb-4 mb-md-0">
+      <div class="card admin-card shadow-sm h-100">
+        <div class="card-body d-flex flex-column">
+
+          <h4 class="mb-4">แก้ไขข้อมูลผู้ใช้งาน</h4>
+
+          <form method="post" class="d-flex flex-column flex-grow-1">
+            {% csrf_token %}
+
+            <!-- Username -->
+            <div class="mb-3">
+              <label class="form-label">Username</label>
+              <input type="text"
+                     name="username"
+                     class="form-control"
+                     value="{{ target.username }}"
+                     required>
+            </div>
+
+            <!-- Password -->
+            <div class="mb-3">
+              <label class="form-label">Password</label>
+              <input type="password"
+                     name="password"
+                     class="form-control"
+                     placeholder="เว้นว่างไว้หากไม่ต้องการเปลี่ยน">
+            </div>
+
+            <!-- Telegram Chat ID -->
+            <div class="mb-3">
+              <label class="form-label">Telegram Chat ID</label>
+              <input type="text"
+                     name="telegram_chat_id"
+                     class="form-control"
+                     value="{{ target.telegram_chat_id|default:'' }}">
+            </div>
+
+            <!-- Admin -->
+            <div class="form-check mb-4">
+              <input class="form-check-input"
+                     type="checkbox"
+                     name="is_staff"
+                     id="isStaff"
+                     {% if target.is_staff %}checked{% endif %}
+                     {% if target.id == user.id %}disabled{% endif %}>
+              <label class="form-check-label" for="isStaff">
+                เป็นผู้ดูแลระบบ (Admin)
+              </label>
+
+              {% if target.id == user.id %}
+                <small class="text-danger d-block mt-1">
+                  * คุณไม่สามารถถอดสิทธิ์ Admin ของตัวเองได้
+                </small>
+              {% endif %}
+            </div>
+
+            <!-- ===== Buttons ===== -->
+            <div class="mt-auto d-flex justify-content-between gap-3">
+              <a href="{% url 'admin_dashboard' %}"
+                class="btn-system btn-red btn-md">
+                ยกเลิก
+              </a>
+
+              <button type="submit"
+                class="btn-system btn-green btn-md">
+                บันทึกการแก้ไข
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- ================= QR CARD ================= -->
+    <div class="col-lg-4 col-md-5">
+      <div class="card admin-card shadow-sm h-100">
+        <div class="card-body qr-box text-center d-flex flex-column justify-content-center">
+
+          <img src="{% static 'images/addBot.jpg' %}"
+               alt="QR Code"
+               class="qr-image mb-3">
+
+          <p class="mb-3">
+            QR Code สำหรับเพิ่ม Telegram Bot
+          </p>
+
+          <a href="https://api.telegram.org/bot8503471157:AAGd2t27qIp-GUCoyj_rn6xwYeQrMH9pVvI/getUpdates"
+             target="_blank"
+             class="btn-system btn-blue mx-auto">
+            TOKEN
+          </a>
+
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+{% endblock %}

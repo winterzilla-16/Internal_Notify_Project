@@ -21,11 +21,6 @@
         <a href="{% url 'admin_create_user' %}" class="btn-system btn-green">
           Create User
         </a>
-
-        <!-- Edit User ยังไม่ทำ → กลับมาหน้านี้ก่อน -->
-        <a href="{% url 'admin_dashboard' %}" class="btn-system btn-blue">
-          Edit User
-        </a>
       </div>
     </div>
   </div>
@@ -198,7 +193,7 @@
               <td class="d-flex gap-2">
 
                 <!-- Edit (Future Feature) -->
-                <a href="{% url 'admin_dashboard' %}"
+                <a href="{% url 'admin_edit_user' u.id %}"
                    class="btn btn-sm btn-outline-primary"
                    title="แก้ไขบัญชีผู้ใช้">
                   ✏

@@ -1,0 +1,328 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Edit Notification{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/buttons.css' %}">
+<link rel="stylesheet" href="{% static 'css/create_notification.css' %}">
+{% endblock %}
+
+{% block content %}
+
+<div class="container create-notify-page my-4">
+  <div class="card shadow-sm create-notify-card">
+    <div class="card-body">
+
+      <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-3">
+        <h4 class="mb-0">แก้ไขการแจ้งเตือน</h4>
+        <small class="text-muted">Edit แล้วถือว่าเริ่มรอบใหม่ (Notification + Reminders)</small>
+      </div>
+
+      <form method="post" enctype="multipart/form-data" id="editNotifyForm">
+        {% csrf_token %}
+
+        <!-- ================= SECTION: Notification ================= -->
+        <div class="section-title">ข้อมูลการแจ้งเตือน</div>
+
+        <div class="row g-3">
+          <div class="col-12">
+            <label class="form-label">Title</label>
+            <input type="text"
+                   name="title"
+                   class="form-control"
+                   required
+                   value="{{ notification.title }}">
+          </div>
+
+          <div class="col-12">
+            <label class="form-label">Description</label>
+            <textarea name="description"
+                      class="form-control"
+                      rows="3"
+                      placeholder="รายละเอียด (ไม่บังคับ)">{{ notification.description|default:"" }}</textarea>
+          </div>
+
+          <!-- ===== Attached File (current) ===== -->
+          <div class="col-12">
+            <label class="form-label">Attached File</label>
+
+            {% if notification.file %}
+              <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+               <a href="{{ MEDIA_URL }}{{ notification.file }}"
+                  target="_blank"
+                  class="btn btn-sm btn-outline-primary">
+                  📂 เปิดไฟล์
+                </a>
+
+                <form method="post"
+                      action="{% url 'remove_notification_file' notification.id %}"
+                      onsubmit="return confirm('คุณต้องการจะลบไฟล์นี้ใช่หรือไม่?');"
+                      class="m-0">
+                  {% csrf_token %}
+                  <button type="submit" class="btn btn-sm btn-outline-danger">
+                    🗑 ลบไฟล์แนบ
+                  </button>
+                </form>
+              </div>
+              <small class="text-muted d-block mt-1">
+                หากต้องการอัปโหลดไฟล์ใหม่ แนะนำให้ลบไฟล์เดิมก่อน
+              </small>
+            {% else %}
+              <div class="text-muted">ไม่มีไฟล์แนบ</div>
+            {% endif %}
+          </div>
+
+          <!-- ===== Upload new file ===== -->
+          <div class="col-12">
+            <label class="form-label">Upload New File (optional)</label>
+            <input type="file" name="file" class="form-control">
+            <small class="text-muted">ถ้าอัปโหลดใหม่ ระบบจะลบไฟล์เดิมแล้วแทนที่ด้วยไฟล์ใหม่</small>
+          </div>
+
+          <div class="col-md-6">
+            <label class="form-label">Event Type</label>
+            <select name="event_type" class="form-select" id="eventType" required>
+              <option value="one_time" {% if notification.event_type == "one_time" %}selected{% endif %}>One Time</option>
+              <option value="recurring" {% if notification.event_type == "recurring" %}selected{% endif %}>Recurring</option>
+            </select>
+          </div>
+        </div>
+
+        <hr class="my-4">
+
+        <!-- ================= SECTION: Timing ================= -->
+        <div class="section-title">กำหนดเวลา</div>
+
+        <!-- ONE TIME -->
+        <div id="oneTimeFields" class="row g-3">
+          <div class="col-md-6">
+            <label class="form-label">Event Datetime</label>
+            <input type="datetime-local"
+                   name="event_datetime"
+                   class="form-control"
+                   value="{% if notification.event_datetime %}{{ notification.event_datetime|date:'Y-m-d\\TH:i' }}{% endif %}">
+            <small class="text-muted">เลือกวันและเวลาที่ต้องการแจ้งเตือน</small>
+          </div>
+        </div>
+
+        <!-- RECURRING -->
+        <div id="recurringFields" class="row g-3 d-none">
+          <div class="col-md-6">
+            <label class="form-label">Start Datetime</label>
+            <input type="datetime-local"
+                   name="start_datetime"
+                   class="form-control"
+                   value="{% if notification.start_datetime %}{{ notification.start_datetime|date:'Y-m-d\\TH:i' }}{% endif %}">
+            <small class="text-muted">วันเริ่มต้นสำหรับการแจ้งเตือนแบบวนซ้ำ</small>
+          </div>
+
+          <div class="col-md-3">
+            <label class="form-label">Interval Value</label>
+            <input type="number"
+                   name="interval_value"
+                   class="form-control"
+                   min="1"
+                   value="{{ notification.interval_value|default:'' }}">
+          </div>
+
+          <div class="col-md-3">
+            <label class="form-label">Interval Unit</label>
+            <select name="interval_unit" class="form-select">
+              <option value="">-- เลือกหน่วย --</option>
+              <option value="minute" {% if notification.interval_unit == "minute" %}selected{% endif %}>minute</option>
+              <option value="hour" {% if notification.interval_unit == "hour" %}selected{% endif %}>hour</option>
+              <option value="day" {% if notification.interval_unit == "day" %}selected{% endif %}>day</option>
+              <option value="month" {% if notification.interval_unit == "month" %}selected{% endif %}>month</option>
+              <option value="year" {% if notification.interval_unit == "year" %}selected{% endif %}>year</option>
+            </select>
+          </div>
+        </div>
+
+        <hr class="my-4">
+
+        <!-- ================= SECTION: Reminders ================= -->
+        <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-2">
+          <div class="section-title mb-0">Reminders (แจ้งเตือนล่วงหน้าได้หลายรายการ)</div>
+
+          <button type="button" id="addReminderBtn" class="btn-system btn-blue btn-sm">
+            + เพิ่ม Reminder
+          </button>
+        </div>
+
+        <div class="hint-text mb-3">
+          ตัวอย่าง: 10 minute = แจ้งเตือนก่อน 10 นาที, 1 hour = แจ้งเตือนก่อน 1 ชั่วโมง
+        </div>
+
+        <div id="remindersWrap" class="reminders-wrap">
+          {% if reminders %}
+            {% for r in reminders %}
+              <div class="reminder-row">
+                <div class="row g-2 align-items-end">
+                  <div class="col-md-4">
+                    <label class="form-label">offset_value</label>
+                    <input type="number" name="offset_value[]" class="form-control" min="1" required value="{{ r.offset_value }}">
+                  </div>
+
+                  <div class="col-md-5">
+                    <label class="form-label">offset_unit</label>
+                    <select name="offset_unit[]" class="form-select" required>
+                      <option value="minute" {% if r.offset_unit == "minute" %}selected{% endif %}>minute</option>
+                      <option value="hour" {% if r.offset_unit == "hour" %}selected{% endif %}>hour</option>
+                      <option value="day" {% if r.offset_unit == "day" %}selected{% endif %}>day</option>
+                      <option value="month" {% if r.offset_unit == "month" %}selected{% endif %}>month</option>
+                    </select>
+                  </div>
+
+                  <div class="col-md-3 d-flex gap-2">
+                    <button type="button" class="btn-system btn-red btn-sm w-100 btn-remove-reminder">
+                      ลบ
+                    </button>
+                  </div>
+                </div>
+              </div>
+            {% endfor %}
+          {% else %}
+            <!-- fallback: อย่างน้อย 1 แถว -->
+            <div class="reminder-row">
+              <div class="row g-2 align-items-end">
+                <div class="col-md-4">
+                  <label class="form-label">offset_value</label>
+                  <input type="number" name="offset_value[]" class="form-control" min="1" required>
+                </div>
+
+                <div class="col-md-5">
+                  <label class="form-label">offset_unit</label>
+                  <select name="offset_unit[]" class="form-select" required>
+                    <option value="minute">minute</option>
+                    <option value="hour">hour</option>
+                    <option value="day">day</option>
+                    <option value="month">month</option>
+                  </select>
+                </div>
+
+                <div class="col-md-3 d-flex gap-2">
+                  <button type="button" class="btn-system btn-red btn-sm w-100 btn-remove-reminder" disabled>
+                    ลบ
+                  </button>
+                </div>
+              </div>
+            </div>
+          {% endif %}
+        </div>
+
+        <hr class="my-4">
+
+        <!-- ================= ACTIONS ================= -->
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+          <a href="{% url 'dashboard' %}" class="btn-system btn-red btn-md">
+            ยกเลิก
+          </a>
+
+          <button type="submit" class="btn-system btn-green btn-md">
+            บันทึกการแก้ไข
+          </button>
+        </div>
+
+      </form>
+    </div>
+  </div>
+</div>
+
+<script>
+  (function () {
+    const eventType = document.getElementById("eventType");
+    const oneTimeFields = document.getElementById("oneTimeFields");
+    const recurringFields = document.getElementById("recurringFields");
+
+    const remindersWrap = document.getElementById("remindersWrap");
+    const addReminderBtn = document.getElementById("addReminderBtn");
+
+    function syncEventTypeUI() {
+      const val = eventType.value;
+
+      if (val === "one_time") {
+        oneTimeFields.classList.remove("d-none");
+        recurringFields.classList.add("d-none");
+
+        oneTimeFields.querySelector('input[name="event_datetime"]').required = true;
+
+        recurringFields.querySelector('input[name="start_datetime"]').required = false;
+        recurringFields.querySelector('input[name="interval_value"]').required = false;
+        recurringFields.querySelector('select[name="interval_unit"]').required = false;
+
+      } else {
+        oneTimeFields.classList.add("d-none");
+        recurringFields.classList.remove("d-none");
+
+        oneTimeFields.querySelector('input[name="event_datetime"]').required = false;
+
+        recurringFields.querySelector('input[name="start_datetime"]').required = true;
+        recurringFields.querySelector('input[name="interval_value"]').required = true;
+        recurringFields.querySelector('select[name="interval_unit"]').required = true;
+      }
+    }
+
+    function updateRemoveButtons() {
+      const rows = remindersWrap.querySelectorAll(".reminder-row");
+      rows.forEach((row) => {
+        const btn = row.querySelector(".btn-remove-reminder");
+        btn.disabled = (rows.length === 1);
+      });
+    }
+
+    function buildReminderRow() {
+      const row = document.createElement("div");
+      row.className = "reminder-row";
+      row.innerHTML = `
+        <div class="row g-2 align-items-end">
+          <div class="col-md-4">
+            <label class="form-label">offset_value</label>
+            <input type="number" name="offset_value[]" class="form-control" min="1" required>
+          </div>
+
+          <div class="col-md-5">
+            <label class="form-label">offset_unit</label>
+            <select name="offset_unit[]" class="form-select" required>
+              <option value="minute">minute</option>
+              <option value="hour">hour</option>
+              <option value="day">day</option>
+              <option value="month">month</option>
+            </select>
+          </div>
+
+          <div class="col-md-3 d-flex gap-2">
+            <button type="button" class="btn-system btn-red btn-sm w-100 btn-remove-reminder">
+              ลบ
+            </button>
+          </div>
+        </div>
+      `;
+      return row;
+    }
+
+    addReminderBtn.addEventListener("click", () => {
+      const current = remindersWrap.querySelectorAll(".reminder-row").length;
+      if (current >= 10) return;
+
+      remindersWrap.appendChild(buildReminderRow());
+      updateRemoveButtons();
+    });
+
+    remindersWrap.addEventListener("click", (e) => {
+      if (!e.target.classList.contains("btn-remove-reminder")) return;
+      const row = e.target.closest(".reminder-row");
+      if (!row) return;
+      row.remove();
+      updateRemoveButtons();
+    });
+
+    eventType.addEventListener("change", syncEventTypeUI);
+
+    // init
+    syncEventTypeUI();
+    updateRemoveButtons();
+  })();
+</script>
+
+{% endblock %}
