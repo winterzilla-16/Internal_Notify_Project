@@ -1,21 +1,51 @@
-.admin-dashboard-page {
-  padding: 10px 0 30px;
+/* ================= ADMIN NOTIFICATION TABLE ================= */
+
+.admin-dashboard-table {
+  width: 100%;
+  table-layout: fixed;
+  border-collapse: collapse;
 }
 
-.dashboard-card {
-  border-radius: 14px;
-  border: 0;
-}
-
-/* ให้ตารางอ่านง่ายขึ้นบนจอเล็ก */
-.table td, .table th {
+.admin-dashboard-table th,
+.admin-dashboard-table td {
+  font-size: 0.8rem;
+  text-align: center !important;
   vertical-align: middle;
+
   white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-/* ปรับให้ไม่แน่นเกินไป */
+/* TITLE */
+.admin-dashboard-table td.text-left {
+  text-align: left;
+}
+
+.truncate {
+  max-width: 220px;
+}
+
+/* DATE / TIME */
+.time-cell {
+  line-height: 1.2;
+}
+
+.time-cell .date-text {
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+
+.time-cell .time-text {
+  font-size: 0.75rem;
+  color: #6c757d;
+}
+
+/* RESPONSIVE */
 @media (max-width: 768px) {
-  .admin-dashboard-page {
-    padding-top: 6px;
+  .admin-dashboard-table th,
+  .admin-dashboard-table td {
+    font-size: 0.75rem;
   }
 }
+

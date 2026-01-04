@@ -81,16 +81,16 @@
             <th>INTERVAL UNIT</th>
             <th>STATUS</th>
             <th>RETRY</th>
-            <th>ACTION</th>
+            <th class="action-col">ACTION</th>
           </tr>
         </thead>
 
         <tbody>
         {% for n in page_obj.object_list %}
           <tr>
-            <td>{{ n.title }}</td>
+            <td class="text-left truncate">{{ n.title }}</td>
 
-            <td class="max-w-200">
+            <td class="text-left truncate">
               {{ n.description|default:"-" }}
             </td>
 
@@ -109,11 +109,37 @@
           </td>
 
 
-            <td>{{ n.event_type }}</td>
-            <td>{{ n.event_datetime|default:"-" }}</td>
-            <td>{{ n.start_datetime|default:"-" }}</td>
-            <td>{{ n.interval_value|default:"-" }}</td>
-            <td>{{ n.interval_unit|default:"-" }}</td>
+            <td class="text-center">{{ n.event_type }}</td>
+
+            <td class="text-center time-cell">
+            {% if n.event_datetime %}
+              <div class="date-text">
+                {{ n.event_datetime|date:"M j, Y" }}
+              </div>
+              <div class="time-text">
+                {{ n.event_datetime|date:"H:i" }}
+              </div>
+            {% else %}
+              -
+            {% endif %}
+          </td>
+
+          
+          <td class="text-center time-cell">
+            {% if n.start_datetime %}
+              <div class="date-text">
+                {{ n.start_datetime|date:"M j, Y" }}
+              </div>
+              <div class="time-text">
+                {{ n.start_datetime|date:"H:i" }}
+              </div>
+            {% else %}
+              -
+            {% endif %}
+          </td>
+
+            <td class="text-center">{{ n.interval_value|default:"-" }}</td>
+            <td class="text-center">{{ n.interval_unit|default:"-" }}</td>
 
             <td>
               <span class="status-badge status-{{ n.status }}">
@@ -121,8 +147,9 @@
               </span>
             </td>
 
-            <td>{{ n.retry_count }}</td>
-            <td>
+            <td class="text-center">{{ n.retry_count }}</td>
+            
+            <td class="action-col">
             
               <div class="action-icons">
               <form method="post"

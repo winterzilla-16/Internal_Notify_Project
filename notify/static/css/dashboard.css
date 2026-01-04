@@ -1,8 +1,7 @@
-/* ================= DASHBOARD TABLE ================= */
-
+/*  DASHBOARD TABLE  */
 .dashboard-table {
   width: 100%;
-  table-layout: fixed;       /* 🔒 บังคับตารางไม่ขยาย */
+  table-layout: fixed;       
   border-collapse: collapse;
 }
 
@@ -12,13 +11,11 @@
   vertical-align: middle;
   text-align: center;
 
-  white-space: nowrap;       /* 🔒 ห้ามขึ้นบรรทัดใหม่ */
-  overflow: hidden;          /* 🔒 ตัดส่วนเกิน */
-  text-overflow: ellipsis;   /* … */
+  white-space: nowrap;       
+  overflow: hidden;          
+  text-overflow: ellipsis;  
 }
 
-
-/* ใช้กับ column ที่ยาว เช่น description */
 .max-w-200 {
   max-width: 200px;
   overflow: hidden;
@@ -27,8 +24,7 @@
 }
 
 
-/* ================= STATUS BADGE ================= */
-
+/*  STATUS BADGE  */
 .status-badge {
   display: inline-block;
   padding: 3px 10px;
@@ -51,8 +47,7 @@
   background-color: #d9534f;
 }
 
-/* ================= FILE LINK ================= */
-
+/*  FILE LINK  */
 .file-link {
   text-decoration: none;
   font-size: 1rem;
@@ -64,8 +59,7 @@
 
 
 
-/* ================= ACTION ICONS ================= */
-
+/*  ACTION ICONS  */
 .action-icons {
   display: flex;
   justify-content: center;
@@ -83,9 +77,7 @@
 }
 
 
-/* ================= PAGINATION ================= */
-/* (เผื่อใช้ในอนาคต ถ้าเลิกใช้ bootstrap button) */
-
+/*  PAGINATION  */
 .pagination-wrapper {
   display: flex;
   justify-content: center;
@@ -117,8 +109,23 @@
   font-weight: 500;
 }
 
-/* ================= ACTION ICON ================= */
+/* ===== DATE & TIME CELL ===== */
+.time-cell {
+  line-height: 1.2;
+}
 
+.time-cell .date-text {
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+
+.time-cell .time-text {
+  font-size: 0.75rem;
+  color: #6c757d; /* เทา bootstrap */
+}
+
+
+/*  ACTION ICONS  */
 .action-icons {
   display: flex;
   gap: 8px;
@@ -126,11 +133,18 @@
   flex-wrap: nowrap;
 }
 
-/* ตัดกรอบดำ แต่ยังใช้ bootstrap hover */
 .icon-btn {
-  padding: 6px 8px;
+  width: 30px;
+  height: 30px;
+  padding: 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  font-size: 1.05rem;
   line-height: 1;
-  font-size: 1.1rem;
+  border-radius: 6px;
 }
 
 .icon-btn:focus,
