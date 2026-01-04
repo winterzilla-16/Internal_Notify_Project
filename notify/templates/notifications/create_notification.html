@@ -86,7 +86,6 @@
               <option value="hour">hour</option>
               <option value="day">day</option>
               <option value="month">month</option>
-              <option value="year">year</option>
             </select>
           </div>
         </div>
@@ -161,6 +160,20 @@
     const remindersWrap = document.getElementById("remindersWrap");
     const addReminderBtn = document.getElementById("addReminderBtn");
 
+    function clearAndDisable(container) {
+      container.querySelectorAll("input, select").forEach(el => {
+        el.value = "";
+        el.disabled = true;
+      });
+    }
+
+    function enable(container) {
+      container.querySelectorAll("input, select").forEach(el => {
+        el.disabled = false;
+      });
+    }
+
+
     function syncEventTypeUI() {
       const val = eventType.value;
 
@@ -168,7 +181,9 @@
         oneTimeFields.classList.remove("d-none");
         recurringFields.classList.add("d-none");
 
-        // ทำให้ required ถูกต้อง
+        enable(oneTimeFields);
+        clearAndDisable(recurringFields);
+
         oneTimeFields.querySelector('input[name="event_datetime"]').required = true;
 
         recurringFields.querySelector('input[name="start_datetime"]').required = false;
@@ -179,7 +194,8 @@
         oneTimeFields.classList.add("d-none");
         recurringFields.classList.remove("d-none");
 
-        oneTimeFields.querySelector('input[name="event_datetime"]').required = false;
+        enable(recurringFields);
+        clearAndDisable(oneTimeFields);
 
         recurringFields.querySelector('input[name="start_datetime"]').required = true;
         recurringFields.querySelector('input[name="interval_value"]').required = true;

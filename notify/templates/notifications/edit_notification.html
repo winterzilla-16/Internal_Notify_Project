@@ -56,15 +56,16 @@
                 </a>
 
                 <form method="post"
-                      action="{% url 'remove_notification_file' notification.id %}"
-                      onsubmit="return confirm('คุณต้องการจะลบไฟล์นี้ใช่หรือไม่?');"
-                      class="m-0">
-                  {% csrf_token %}
-                  <button type="submit" class="btn btn-sm btn-outline-danger">
-                    🗑 ลบไฟล์แนบ
-                  </button>
-                </form>
-              </div>
+                    action="{% url 'remove_notification_file' notification.id %}"
+                    onsubmit="return confirm('คุณต้องการจะลบไฟล์นี้ใช่หรือไม่?');">
+                {% csrf_token %}
+                <button type="submit"
+                        class="btn btn-sm btn-outline-danger">
+                  🗑 ลบไฟล์แนบ
+                </button>
+              </form>
+            </div>
+
               <small class="text-muted d-block mt-1">
                 หากต้องการอัปโหลดไฟล์ใหม่ แนะนำให้ลบไฟล์เดิมก่อน
               </small>
@@ -238,13 +239,39 @@
     const remindersWrap = document.getElementById("remindersWrap");
     const addReminderBtn = document.getElementById("addReminderBtn");
 
+    function clearOneTimeValues() {
+      const input = oneTimeFields.querySelector('input[name="event_datetime"]');
+      if (input) input.value = "";
+    }
+
+    function clearRecurringValues() {
+      const start = recurringFields.querySelector('input[name="start_datetime"]');
+      const value = recurringFields.querySelector('input[name="interval_value"]');
+      const unit  = recurringFields.querySelector('select[name="interval_unit"]');
+
+      if (start) start.value = "";
+      if (value) value.value = "";
+      if (unit) unit.value = "";
+    }
+
+    function confirmRemoveFile() {
+      if (confirm("คุณต้องการจะลบไฟล์นี้ใช่หรือไม่?")) {
+        document.getElementById("removeFileInput").value = "1";
+      }
+    }
+
     function syncEventTypeUI() {
       const val = eventType.value;
 
       if (val === "one_time") {
+        // show / hide
         oneTimeFields.classList.remove("d-none");
         recurringFields.classList.add("d-none");
 
+        // 🔥 ล้างค่าของ recurring
+        clearRecurringValues();
+
+        // required
         oneTimeFields.querySelector('input[name="event_datetime"]').required = true;
 
         recurringFields.querySelector('input[name="start_datetime"]').required = false;
@@ -252,9 +279,14 @@
         recurringFields.querySelector('select[name="interval_unit"]').required = false;
 
       } else {
+        // show / hide
         oneTimeFields.classList.add("d-none");
         recurringFields.classList.remove("d-none");
 
+        // 🔥 ล้างค่าของ one time
+        clearOneTimeValues();
+
+        // required
         oneTimeFields.querySelector('input[name="event_datetime"]').required = false;
 
         recurringFields.querySelector('input[name="start_datetime"]').required = true;
@@ -324,5 +356,6 @@
     updateRemoveButtons();
   })();
 </script>
+
 
 {% endblock %}

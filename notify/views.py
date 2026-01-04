@@ -514,6 +514,35 @@ def edit_notification(request, notification_id):
     })
 
 
+@never_cache
+@login_required(login_url="login")
+@transaction.atomic
+def remove_notification_file(request, notification_id):
+    if request.method != "POST":
+        return redirect("dashboard")
+
+    notification = get_object_or_404(
+        Notification, id=notification_id, user=request.user
+    )
+
+    if notification.file:
+        full_path = os.path.join(settings.MEDIA_ROOT, notification.file)
+        if os.path.exists(full_path):
+            try:
+                os.remove(full_path)
+            except Exception:
+                pass
+
+        notification.file = None
+        notification.save(update_fields=["file"])
+
+        messages.success(request, "ลบไฟล์แนบเรียบร้อยแล้ว ✅")
+
+    else:
+        messages.warning(request, "ไม่พบไฟล์แนบ")
+
+    return redirect("edit_notification", notification_id=notification.id)
+
 
 # Send Now Notification (USER)
 @never_cache
@@ -554,39 +583,3 @@ def send_now_notification(request, notification_id):
         )
 
     return redirect("dashboard")
-
-
-# Remove Notification File (USER)
-@never_cache
-@login_required(login_url="login")
-@transaction.atomic
-def remove_notification_file(request, notification_id):
-    if request.method != "POST":
-        return redirect("dashboard")
-
-    notification = get_object_or_404(Notification, id=notification_id, user=request.user)
-
-    if not notification.file:
-        messages.error(request, "ไม่พบไฟล์แนบ")
-        return redirect("edit_notification", notification_id=notification.id)
-
-    # path ใน DB เป็นแบบ: "user_uploads/xxx.pdf"
-    file_rel = notification.file
-    full_path = os.path.join(settings.MEDIA_ROOT, file_rel)
-
-    try:
-        if os.path.exists(full_path):
-            os.remove(full_path)
-
-        # ล้างค่าใน DB
-        notification.file = None
-        notification.save(update_fields=["file"])
-
-        messages.success(request, "ลบไฟล์แนบเรียบร้อยแล้ว ✅")
-
-    except Exception:
-        messages.error(request, "ไม่สามารถลบไฟล์ได้ ❌")
-
-    return redirect("edit_notification", notification_id=notification.id)
-
-

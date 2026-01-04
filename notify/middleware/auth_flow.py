@@ -24,8 +24,14 @@ class AuthFlowMiddleware:
             '/admin-create_user/',
         ]
 
-        # user dashboard
-        self.user_dashboard = '/dashboard/'
+        # user-only pages (admin ห้ามเข้า)
+        self.user_only_paths = [
+            '/dashboard/',
+            '/notifications/',
+            '/notifications/create/',
+            '/notifications/edit/',
+        ]
+
 
     def __call__(self, request):
         path = request.path
@@ -45,19 +51,23 @@ class AuthFlowMiddleware:
                     return redirect('admin_dashboard')
                 return redirect('/dashboard/')
 
-            # user ธรรมดา ห้ามเข้า admin
-            if path in self.admin_paths and not request.user.is_staff:
-                return redirect('/dashboard/')
+            # user-only pages (admin ห้ามเข้า)
+            if any(path.startswith(p) for p in self.user_only_paths):
+                if request.user.is_staff:
+                    return redirect('admin_dashboard')
 
-            # admin เข้า user dashboard → พาไป admin dashboard
-            if path == self.user_dashboard and request.user.is_staff:
-                return redirect('admin_dashboard')
+            # admin-only pages (user ห้ามเข้า)
+            if any(path.startswith(p) for p in self.admin_paths):
+                if not request.user.is_staff:
+                    return redirect('/dashboard/')
+
+
 
         # ===============================
         # ยังไม่ LOGIN
         # ===============================
         else:
-            protected_paths = self.admin_paths + [self.user_dashboard]
+            protected_paths = self.admin_paths + [self.user_only_paths]
 
             if path in protected_paths:
                 return redirect('/')
