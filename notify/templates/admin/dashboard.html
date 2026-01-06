@@ -81,15 +81,12 @@
             <th class="truncate text-center">START</th>
             <th class="truncate text-center">INTERVAL VALUE</th>
             <th class="truncate text-center">INTERVAL UNIT</th>
-            <th class="truncate text-center">OFFSET VALUE</th>
-            <th class="truncate text-center">OFFSET UNIT</th>
             <th class="truncate text-center">CREATED</th>
           </tr>
         </thead>
 
         <tbody>
         {% for n in notif_page.object_list %}
-          {% with r=n.reminders.all|first %}
           <tr>
             <td class="truncate text-center">{{ n.id }}</td>
             <td class="truncate text-center">{{ n.user_id }}</td>
@@ -125,18 +122,15 @@
             <td class="truncate text-center">{{ n.interval_value|default:"-" }}</td>
             <td class="truncate text-center">{{ n.interval_unit|default:"-" }}</td>
 
-            <td class="truncate text-center">{% if r %}{{ r.offset_value }}{% else %}-{% endif %}</td>
-            <td class="truncate text-center">{% if r %}{{ r.offset_unit }}{% else %}-{% endif %}</td>
             <!-- CREATED -->
             <td class="time-cell truncate text-center">
               <div class="date-text">{{ n.created_at|date:"M j, Y" }}</div>
               <div class="time-text">{{ n.created_at|date:"H:i" }}</div>
             </td>
           </tr>
-          {% endwith %}
         {% empty %}
           <tr>
-            <td colspan="11" class="text-center py-4 text-muted">
+            <td colspan="9" class="text-center py-4 text-muted">
               ไม่มีข้อมูล notifications
             </td>
           </tr>

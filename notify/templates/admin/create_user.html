@@ -5,10 +5,7 @@
 
 {% block content %}
 
-<!-- Global Button System -->
 <link rel="stylesheet" href="{% static 'css/buttons.css' %}">
-
-<!-- Page specific style -->
 <link rel="stylesheet" href="{% static 'css/admin_create_user.css' %}">
 
 <div class="container admin-create-user-page">
@@ -24,41 +21,92 @@
           <form method="post" class="d-flex flex-column flex-grow-1">
             {% csrf_token %}
 
+            <!-- Username -->
             <div class="mb-3">
               <label class="form-label">Username</label>
-              <input type="text" name="username" class="form-control" required>
+              <input type="text"
+                     name="username"
+                     class="form-control"
+                     value="{{ form.username }}"
+                     required>
             </div>
 
+            <!-- Password -->
             <div class="mb-3">
               <label class="form-label">Password</label>
-              <input type="password" name="password" class="form-control" required>
+              <input type="password"
+                     name="password"
+                     class="form-control"
+                     required>
             </div>
 
+            <!-- Telegram Chat ID -->
             <div class="mb-3">
               <label class="form-label">Telegram Chat ID</label>
-              <input type="text" name="telegram_chat_id" class="form-control">
-              <small class="text-muted">(กรอกทีหลังได้)</small>
+              <input type="text"
+                     name="telegram_chat_id"
+                     id="telegramChatId"
+                     class="form-control"
+                     value="{{ form.telegram_chat_id|default:'' }}">
+              <small class="text-muted">(จำเป็นสำหรับ User)</small>
             </div>
 
-            <div class="form-check mb-4">
-              <input class="form-check-input" type="checkbox" name="is_staff" id="isStaff">
-              <label class="form-check-label" for="isStaff">
-                เป็นผู้ดูแลระบบ (Admin)
-              </label>
+            <!-- Department -->
+            <div class="mb-3">
+              <label class="form-label">Department</label>
+              <select name="department" class="form-select" required>
+                <option value="">-- เลือกแผนก --</option>
+                {% for value, label in departments %}
+                  <option value="{{ value }}"
+                    {% if form.department == value %}selected{% endif %}>
+                    {{ label }}
+                  </option>
+                {% endfor %}
+              </select>
             </div>
 
-            <!-- ===== Buttons ===== -->
+            <!-- Role -->
+            <div class="mb-4">
+              <label class="form-label d-block mb-2">Role</label>
+
+              <div class="form-check">
+                <input class="form-check-input"
+                       type="radio"
+                       name="role"
+                       id="roleUser"
+                       value="user"
+                       {% if form.role == "user" or not form.role %}checked{% endif %}>
+                <label class="form-check-label" for="roleUser">
+                  ผู้ใช้งานทั่วไป (User)
+                </label>
+              </div>
+
+              <div class="form-check">
+                <input class="form-check-input"
+                       type="radio"
+                       name="role"
+                       id="roleAdmin"
+                       value="admin"
+                       {% if form.role == "admin" %}checked{% endif %}>
+                <label class="form-check-label" for="roleAdmin">
+                  ผู้ดูแลระบบ (Admin)
+                </label>
+              </div>
+            </div>
+
+            <!-- Buttons -->
             <div class="mt-auto d-flex justify-content-between gap-3">
               <a href="{% url 'admin_dashboard' %}"
-                class="btn-system btn-red btn-md">
+                 class="btn-system btn-red btn-md">
                 ยกเลิก
               </a>
 
               <button type="submit"
-                class="btn-system btn-green btn-md">
+                      class="btn-system btn-green btn-md">
                 สร้างผู้ใช้
               </button>
             </div>
+
           </form>
         </div>
       </div>
@@ -89,5 +137,30 @@
 
   </div>
 </div>
+
+<!-- ================= JS ================= -->
+<script>
+  (function () {
+    const roleUser = document.getElementById("roleUser");
+    const roleAdmin = document.getElementById("roleAdmin");
+    const telegramInput = document.getElementById("telegramChatId");
+
+    function syncTelegramRequirement() {
+      if (roleUser.checked) {
+        telegramInput.required = true;
+        telegramInput.placeholder = "จำเป็นสำหรับ User";
+      } else {
+        telegramInput.required = false;
+        telegramInput.placeholder = "(ไม่บังคับสำหรับ Admin)";
+      }
+    }
+
+    roleUser.addEventListener("change", syncTelegramRequirement);
+    roleAdmin.addEventListener("change", syncTelegramRequirement);
+
+    // init
+    syncTelegramRequirement();
+  })();
+</script>
 
 {% endblock %}

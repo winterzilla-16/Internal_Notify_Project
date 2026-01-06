@@ -14,7 +14,7 @@ from django.contrib.auth.hashers import make_password
 from django.db import transaction
 
 from notify.services.savefile import get_available_filename
-from notify.models import Notification, User, Reminder
+from notify.models import Notification, User
 
 
 
@@ -72,7 +72,6 @@ def user_dashboard(request):
     notifications_qs = (
         Notification.objects
         .filter(user=request.user)
-        .prefetch_related("reminders")
         .order_by("-created_at")   # ใหม่สุดอยู่บน
     )
 
@@ -104,7 +103,6 @@ def admin_dashboard(request):
     notif_qs = (
         Notification.objects
         .select_related('user')
-        .prefetch_related('reminders')
         .order_by('-created_at')
     )
 
@@ -144,11 +142,38 @@ def admin_create_user(request):
         username = request.POST.get('username')
         password = request.POST.get('password')
         telegram_chat_id = request.POST.get('telegram_chat_id')
-        is_staff = request.POST.get('is_staff')  # checkbox
+        department = request.POST.get("department")
+        role = request.POST.get("role", "user")
 
         if not username or not password:
             messages.error(request, 'กรุณากรอกข้อมูลให้ครบ')
             return redirect('admin_create_user')
+        
+        if not department:
+            messages.error(request, "กรุณาเลือกแผนก (Department)")
+            return redirect("admin_create_user")
+        
+        if role not in ("user", "admin"):
+            messages.error(request, "Role ไม่ถูกต้อง")
+            return redirect('admin_create_user')
+
+        if role == "user" and not telegram_chat_id:
+            messages.error(
+                request,
+                "บัญชีผู้ใช้งานทั่วไป (User) ต้องระบุ Telegram Chat ID"
+            )
+            
+            return render(request, "admin_create_user", {
+                    "departments": User.DEPARTMENT_CHOICES,
+                    "form": {
+                        "username": username,
+                        "telegram_chat_id": telegram_chat_id,
+                        "department": department,
+                        "role": role,
+                    }
+                })
+
+            # return redirect('admin_create_user')
 
         if User.objects.filter(username=username).exists():
             messages.error(request, 'Username นี้มีอยู่แล้ว')
@@ -162,18 +187,15 @@ def admin_create_user(request):
 
         # ใส่ telegram_chat_id
         new_user.telegram_chat_id = telegram_chat_id
-
-        # กำหนดสิทธิ์ admin หรือ user
-        if is_staff == 'on':
-            new_user.is_staff = True
-
+        new_user.department = department
+        new_user.is_staff = (role == "admin")
         new_user.save()
 
         messages.success(request, "สร้างผู้ใช้งานสำเร็จ")
         return redirect('admin_dashboard')
 
 
-    return render(request, 'admin/create_user.html')
+    return render(request, 'admin/create_user.html', {"departments": User.DEPARTMENT_CHOICES})
 
 
 # Delete User Function (ADMIN)
@@ -336,7 +358,6 @@ def create_notification(request):
         if uploaded_file:
             upload_dir = settings.MEDIA_ROOT
             upload_dir.mkdir(exist_ok=True)
-            # parents=True,
 
             original_name = uploaded_file.name
             safe_name = get_available_filename(upload_dir, original_name)
@@ -346,20 +367,6 @@ def create_notification(request):
 
             notification.file = filename
             notification.save(update_fields=["file"])
-
-        # =====================
-        # 5. สร้าง Reminders (หลายรายการ)
-        # =====================
-        offset_values = request.POST.getlist("offset_value[]")
-        offset_units = request.POST.getlist("offset_unit[]")
-
-        for val, unit in zip(offset_values, offset_units):
-            if val and unit:
-                Reminder.objects.create(
-                    notification=notification,
-                    offset_value=int(val),
-                    offset_unit=unit
-                )
 
         # =====================
         # 6. Feedback + Redirect
@@ -377,7 +384,6 @@ def create_notification(request):
 @transaction.atomic
 def edit_notification(request, notification_id):
     notification = get_object_or_404(Notification, id=notification_id, user=request.user)
-    reminders_qs = notification.reminders.all().order_by("id")
 
     if request.method == "POST":
         # =====================
@@ -401,7 +407,6 @@ def edit_notification(request, notification_id):
             messages.error(request, "กรุณากรอก Title")
             return render(request, "notifications/edit_notification.html", {
                 "notification": notification,
-                "reminders": reminders_qs,
             })
 
         if event_type == "one_time":
@@ -409,20 +414,17 @@ def edit_notification(request, notification_id):
                 messages.error(request, "กรุณาเลือก Event Datetime (One Time)")
                 return render(request, "notifications/edit_notification.html", {
                     "notification": notification,
-                    "reminders": reminders_qs,
                 })
         elif event_type == "recurring":
             if not (start_datetime_raw and interval_value and interval_unit):
                 messages.error(request, "กรุณากรอก Start/Interval ให้ครบ (Recurring)")
                 return render(request, "notifications/edit_notification.html", {
                     "notification": notification,
-                    "reminders": reminders_qs,
                 })
         else:
             messages.error(request, "Event Type ไม่ถูกต้อง")
             return render(request, "notifications/edit_notification.html", {
                 "notification": notification,
-                "reminders": reminders_qs,
             })
 
         # =====================
@@ -466,21 +468,15 @@ def edit_notification(request, notification_id):
         # 5) ถ้ามีอัปโหลดไฟล์ใหม่ -> ลบไฟล์เก่า + save ใหม่
         # =====================
         if uploaded_file:
-            # ลบไฟล์เดิม (ถ้ามี)
             if notification.file:
-                old_full = os.path.join(settings.MEDIA_ROOT, notification.file)
-                if os.path.exists(old_full):
-                    try:
-                        os.remove(old_full)
-                    except Exception:
-                        pass
+                old_path = settings.MEDIA_ROOT / notification.file
+                if old_path.exists():
+                    old_path.unlink(missing_ok=True)
 
             upload_dir = settings.MEDIA_ROOT / "user_uploads"
             upload_dir.mkdir(parents=True, exist_ok=True)
 
-            original_name = uploaded_file.name
-            safe_name = get_available_filename(str(upload_dir), original_name)
-
+            safe_name = get_available_filename(str(upload_dir), uploaded_file.name)
             fs = FileSystemStorage(location=upload_dir)
             filename = fs.save(safe_name, uploaded_file)
 
@@ -488,31 +484,15 @@ def edit_notification(request, notification_id):
             notification.file = f"user_uploads/{filename}"
             notification.save(update_fields=["file"])
 
-        # =====================
-        # 6) Reminders: ลบทิ้งแล้วสร้างใหม่ (เริ่มรอบใหม่)
-        # =====================
-        notification.reminders.all().delete()
-
-        offset_values = request.POST.getlist("offset_value[]")
-        offset_units = request.POST.getlist("offset_unit[]")
-
-        for val, unit in zip(offset_values, offset_units):
-            if val and unit:
-                Reminder.objects.create(
-                    notification=notification,
-                    offset_value=int(val),
-                    offset_unit=unit
-                )
-
         messages.success(request, "บันทึกการแก้ไขเรียบร้อยแล้ว ✅")
         return redirect("dashboard")
 
-    # GET: แสดงฟอร์มพร้อมข้อมูลเดิม
     return render(request, "notifications/edit_notification.html", {
         "notification": notification,
-        "reminders": reminders_qs,
     })
 
+
+from pathlib import Path
 
 @never_cache
 @login_required(login_url="login")
@@ -525,22 +505,24 @@ def remove_notification_file(request, notification_id):
         Notification, id=notification_id, user=request.user
     )
 
-    if notification.file:
-        full_path = os.path.join(settings.MEDIA_ROOT, notification.file)
-        if os.path.exists(full_path):
-            try:
-                os.remove(full_path)
-            except Exception:
-                pass
-
-        notification.file = None
-        notification.save(update_fields=["file"])
-
-        messages.success(request, "ลบไฟล์แนบเรียบร้อยแล้ว ✅")
-
-    else:
+    if not notification.file:
         messages.warning(request, "ไม่พบไฟล์แนบ")
+        return redirect("edit_notification", notification_id=notification.id)
 
+    file_path = Path(settings.MEDIA_ROOT) / notification.file
+
+    if file_path.exists():
+        try:
+            file_path.unlink()
+        except Exception as e:
+            messages.error(request, "ไม่สามารถลบไฟล์ได้")
+            print("[FILE] delete error:", e)
+            return redirect("edit_notification", notification_id=notification.id)
+
+    notification.file = None
+    notification.save(update_fields=["file"])
+
+    messages.success(request, "ลบไฟล์แนบเรียบร้อยแล้ว ✅")
     return redirect("edit_notification", notification_id=notification.id)
 
 

@@ -36,13 +36,15 @@ def send_telegram_message(notification) -> bool:
 
     try:
         resp = requests.post(
-            f"{BASE_URL}/sendMessage",
-            json={
-                "chat_id": user.telegram_chat_id,
-                "text": message_text,
-            },
-            timeout=10,
-        )
+        f"{BASE_URL}/sendMessage",
+        json={
+            "chat_id": user.telegram_chat_id,
+            "text": message_text,
+        },
+        timeout=10,
+        proxies={"http": None, "https": None},
+    )
+
 
         print("[TG] status:", resp.status_code)
         print("[TG] response:", resp.text)
@@ -129,11 +131,13 @@ def send_file(chat_id: str, file_path: str, caption: str = "") -> bool:
             }
 
             response = requests.post(
-                f"{BASE_URL}/{endpoint}",
-                data=data,
-                files=files,
-                timeout=20,
+            f"{BASE_URL}/{endpoint}",
+            data=data,
+            files=files,
+            timeout=20,
+            proxies={"http": None, "https": None}
             )
+
 
         print("[TG] file status:", response.status_code)
         return response.status_code == 200

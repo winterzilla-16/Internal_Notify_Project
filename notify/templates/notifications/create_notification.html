@@ -16,7 +16,7 @@
 
       <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-3">
         <h4 class="mb-0">สร้างการแจ้งเตือน</h4>
-        <small class="text-muted">กรอกครั้งเดียวจบ (Notification + Reminders)</small>
+        <small class="text-muted">กรอกครั้งเดียวจบ</small>
       </div>
 
       <form method="post" enctype="multipart/form-data" id="createNotifyForm">
@@ -92,49 +92,6 @@
 
         <hr class="my-4">
 
-        <!-- ================= SECTION: Reminders ================= -->
-        <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-2">
-          <div class="section-title mb-0">Reminders (แจ้งเตือนล่วงหน้าได้หลายรายการ)</div>
-
-          <button type="button" id="addReminderBtn" class="btn-system btn-blue btn-sm">
-            + เพิ่ม Reminder
-          </button>
-        </div>
-
-        <div class="hint-text mb-3">
-          ตัวอย่าง: 10 minute = แจ้งเตือนก่อน 10 นาที, 1 hour = แจ้งเตือนก่อน 1 ชั่วโมง
-        </div>
-
-        <div id="remindersWrap" class="reminders-wrap">
-          <!-- เริ่มต้นมี 1 แถว -->
-          <div class="reminder-row" data-index="0">
-            <div class="row g-2 align-items-end">
-              <div class="col-md-4">
-                <label class="form-label">offset_value</label>
-                <input type="number" name="offset_value[]" class="form-control" min="1" required>
-              </div>
-
-              <div class="col-md-5">
-                <label class="form-label">offset_unit</label>
-                <select name="offset_unit[]" class="form-select" required>
-                  <option value="minute">minute</option>
-                  <option value="hour">hour</option>
-                  <option value="day">day</option>
-                  <option value="month">month</option>
-                </select>
-              </div>
-
-              <div class="col-md-3 d-flex gap-2">
-                <button type="button" class="btn-system btn-red btn-sm w-100 btn-remove-reminder" disabled>
-                  ลบ
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <hr class="my-4">
-
         <!-- ================= ACTIONS ================= -->
         <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
           <a href="{% url 'dashboard' %}" class="btn-system btn-red btn-md">
@@ -156,9 +113,6 @@
     const eventType = document.getElementById("eventType");
     const oneTimeFields = document.getElementById("oneTimeFields");
     const recurringFields = document.getElementById("recurringFields");
-
-    const remindersWrap = document.getElementById("remindersWrap");
-    const addReminderBtn = document.getElementById("addReminderBtn");
 
     function clearAndDisable(container) {
       container.querySelectorAll("input, select").forEach(el => {
@@ -203,68 +157,9 @@
       }
     }
 
-    function updateRemoveButtons() {
-      const rows = remindersWrap.querySelectorAll(".reminder-row");
-      rows.forEach((row, idx) => {
-        const btn = row.querySelector(".btn-remove-reminder");
-        // แถวแรกห้ามลบ เพื่อให้มี reminder อย่างน้อย 1 อัน
-        btn.disabled = (rows.length === 1);
-      });
-    }
-
-    function buildReminderRow() {
-      const row = document.createElement("div");
-      row.className = "reminder-row";
-      row.innerHTML = `
-        <div class="row g-2 align-items-end">
-          <div class="col-md-4">
-            <label class="form-label">offset_value</label>
-            <input type="number" name="offset_value[]" class="form-control" min="1" required>
-          </div>
-
-          <div class="col-md-5">
-            <label class="form-label">offset_unit</label>
-            <select name="offset_unit[]" class="form-select" required>
-              <option value="minute">minute</option>
-              <option value="hour">hour</option>
-              <option value="day">day</option>
-              <option value="month">month</option>
-            </select>
-          </div>
-
-          <div class="col-md-3 d-flex gap-2">
-            <button type="button" class="btn-system btn-red btn-sm w-100 btn-remove-reminder">
-              ลบ
-            </button>
-          </div>
-        </div>
-      `;
-      return row;
-    }
-
-    addReminderBtn.addEventListener("click", () => {
-      // กัน UX แย่: จำกัด max 10 ก่อน (แก้ได้ทีหลัง)
-      const current = remindersWrap.querySelectorAll(".reminder-row").length;
-      if (current >= 10) return;
-
-      remindersWrap.appendChild(buildReminderRow());
-      updateRemoveButtons();
-    });
-
-    remindersWrap.addEventListener("click", (e) => {
-      if (!e.target.classList.contains("btn-remove-reminder")) return;
-
-      const row = e.target.closest(".reminder-row");
-      if (!row) return;
-
-      row.remove();
-      updateRemoveButtons();
-    });
-
     // init
     eventType.addEventListener("change", syncEventTypeUI);
     syncEventTypeUI();
-    updateRemoveButtons();
   })();
 </script>
 

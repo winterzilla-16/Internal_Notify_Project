@@ -18,7 +18,7 @@ def start():
     scheduler.add_job(
         process_notifications,
         trigger='interval',
-        seconds=30,  # ตรวจทุก 30 วิ
+        seconds=15,  # ตรวจทุก 30 วิ
         id='notification_engine',
         replace_existing=True,
         max_instances=1,

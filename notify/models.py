@@ -15,11 +15,32 @@ class User(AbstractUser):
     - telegram_chat_id ไม่ unique
     """
 
+    DEPARTMENT_CHOICES = [
+        ("UN", "Unassigned (ต้องแก้ไข)"),
+        ('FO', 'Front Office'),
+        ('RS', 'Reservations'),
+        ('EO', 'Executive Office'),
+        ('FI', 'Finance'),
+        ('SM', 'Sales Marketing'),
+        ('RV', 'Revenue'),
+        ('FB', 'Food & Beverage'),
+        ('KC', 'Kitchen'),
+        ('EN', 'Engineering'),
+        ('HR', 'Human Resource'),
+        ('HK', 'House Keeping'),
+    ]
+
     telegram_chat_id = models.CharField(
         max_length=50,
         null=True,
         blank=True,
         help_text="Telegram chat ID for sending notifications"
+    )
+
+    department = models.CharField(
+        max_length=2,
+        choices=DEPARTMENT_CHOICES,
+        help_text="User Department"
     )
 
     class Meta:
@@ -44,7 +65,6 @@ class Notification(models.Model):
         ('hour', 'hour'),
         ('day', 'day'),
         ('month', 'month'),
-        ('year', 'year'),
     ]
 
     STATUS_CHOICES = [
@@ -83,7 +103,7 @@ class Notification(models.Model):
         max_length=10,
         choices=STATUS_CHOICES,
         default='pending',
-        help_text='Notification sending status'
+        help_text='Notification Sending Status'
     )
 
     retry_count = models.PositiveSmallIntegerField(
@@ -100,38 +120,3 @@ class Notification(models.Model):
 
     def __str__(self):
         return self.title
-
-
-# =====================
-# Reminder Table
-# =====================
-
-class Reminder(models.Model):
-    OFFSET_UNIT_CHOICES = [
-        ('minute', 'minute'),
-        ('hour', 'hour'),
-        ('day', 'day'),
-        ('month', 'month'),
-    ]
-
-    notification = models.ForeignKey(
-        Notification,
-        on_delete=models.CASCADE,
-        related_name='reminders',
-        db_column='notification_id'
-    )
-
-    offset_value = models.IntegerField()
-    offset_unit = models.CharField(
-        max_length=10,
-        choices=OFFSET_UNIT_CHOICES
-    )
-
-    last_sent_event_at = models.DateTimeField(null=True, blank=True)
-    
-
-    class Meta:
-        db_table = 'reminders'
-
-    def __str__(self):
-        return f'{self.offset_value} {self.offset_unit}'
